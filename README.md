@@ -214,7 +214,7 @@ s3://bucket/output/document-name/
 - MDP version 1.0 can be deployed in regions that have BDA, although use of BDA is just a part of it to handle english reports. So update the `deploy_dynamic.sh` with the right region. Also please ensure Clause 3.7 Sonnet is accessible in your account wherever it is available. (Regions were BDA is available: `us-east-1`, `us-west-2`, `us-gov-west-1`, `eu-central-1`, `eu-west-1`, `eu-west-2`, `ap-south-1`, `ap-southeast-2`)
 - If you already have a stack deployed in an AWS region, delete the stack first before deploying another stack as this may cause some role creation clashes and the new stack may throw some errors.
 - If you wish to modify the code and build your own custom image, just modify the code in the `src` folder, delete the `images` folder that gets created when you had run the `./build_sagemaker_prebuilt.sh` scriot and then run `./build_sagemaker_prebuilt.sh` again. This will re-build the docker image in the `images` folder.
-- Users should use a repreentative doc, estimate the cost based on token information and then run the full workload to ensure their cost sensitivities are managed.
+- Users should use a representative doc, estimate the cost based on token information and then run the full workload to ensure their cost sensitivities are managed.
 
 ## ⚡ Quick Start (5 Minutes)
 
