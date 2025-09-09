@@ -1,0 +1,82 @@
+{
+  "_comment": "Multi-lingual Document Processor Stack Configuration",
+  "_description": "Copy this file to stack_config.json and modify the values as needed",
+  
+  "deployment": {
+    "_comment": "Core deployment settings",
+    "bucket_name": "mdp-newtest-1",
+    "aws_region": "us-east-1",
+    "ecr_repository_name": "document-processor",
+    "docker_image_tag": "latest",
+    "stack_name": "mdp-stack-2"
+  },
+  
+  "lambda": {
+    "_comment": "Lambda function configuration",
+    "s3_key": "code/multi-lingual-document-processor.zip",
+    "runtime": "python3.10",
+    "timeout": 900,
+    "memory_size": 1024,
+    "ephemeral_storage_size": 10240,
+    "_environment_variables": {
+      "_comment": "Environment variables automatically set by deployment",
+      "ECR_IMAGE_URI": "ECR image URI for SageMaker processing (auto-generated)",
+      "SAGEMAKER_ROLE_ARN": "SageMaker execution role ARN (auto-generated)",
+      "CODE_BUCKET": "S3 bucket for code storage (auto-generated)",
+      "BEDROCK_PROJECT_ARN": "Bedrock project ARN (auto-generated)"
+    }
+  },
+  
+  "bedrock": {
+    "_comment": "Amazon Bedrock configuration",
+    "project_name": "mdp-bedrock-automation-project-3",
+    "project_stage": "DEVELOPMENT"
+  },
+  
+  "api_gateway": {
+    "_comment": "API Gateway configuration",
+    "stage_name": "prod",
+    "throttle_rate_limit": 100,
+    "throttle_burst_limit": 200,
+    "quota_limit": 10000,
+    "quota_period": "DAY"
+  },
+  
+  "layers": {
+    "_comment": "Lambda layer configurations - update S3 keys to match your layer files",
+    "sm_layer": {
+      "s3_key": "Layers/SM_layer_new-a5ffd1d6-c8ea-46da-a6a2-5fde3f56bfea.zip",
+      "description": "SageMaker layer for document processing"
+    },
+    "rpds_layer": {
+      "s3_key": "Layers/rpds_layer_new-77170122-82b4-4d4c-a641-21c22d1958cc.zip",
+      "description": "RPDS layer for document processing"
+    },
+    "pandas_layer": {
+      "s3_key": "Layers/pandas_layer_new-aeb1aa13-9fd0-42e3-92eb-3a88421a15b0.zip",
+      "description": "Pandas layer for document processing"
+    },
+    "pydantic_layer": {
+      "s3_key": "Layers/pydantic_layer-5de6968a-c7c4-4ff1-adc4-2bbbdc7e8a59.zip",
+      "description": "Pydantic layer for document processing"
+    },
+    "numpy_layer": {
+      "s3_key": "Layers/numpy_layer_new-2f638ff0-7c24-4697-a9bb-44cc0eef08a7.zip",
+      "description": "Numpy layer for document processing"
+    }
+  },
+  
+  "compatible_runtimes": [
+    "python3.10",
+    "python3.11",
+    "python3.12"
+  ],
+  
+  "tags": {
+    "_comment": "Resource tags for cost tracking and organization",
+    "Project": "MultiLingualDocumentProcessor",
+    "Environment": "Production",
+    "Owner": "DataTeam",
+    "CostCenter": "AI-ML"
+  }
+}

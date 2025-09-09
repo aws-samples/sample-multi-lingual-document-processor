@@ -1,0 +1,160 @@
+# SageMaker-optimized Dockerfile for linux/amd64
+# This Dockerfile is specifically designed for AWS SageMaker Processing Jobs
+FROM --platform=linux/amd64 python:3.10-slim
+
+# Set build arguments
+ARG TARGETPLATFORM=linux/amd64
+ARG BUILDPLATFORM
+
+# Set environment variables for SageMaker
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV SM_FRAMEWORK_PARAMS=true
+ENV PYTHONPATH=/opt/ml/processing/input/code:/opt/ml/src
+
+# Create GenAIIC user for security
+RUN groupadd -r GenAIIC && useradd -r -g GenAIIC -m -d /home/GenAIIC -s /bin/bash GenAIIC
+
+# Install system dependencies required for SageMaker and document processing
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    wget \
+    curl \
+    ca-certificates \
+    default-jre \
+    default-jdk \
+    poppler-utils \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libxrender-dev \
+    libgomp1 \
+    libfontconfig1 \
+    libgl1-mesa-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    libavcodec-dev \
+    libavformat-dev \
+    libswscale-dev \
+    libv4l-dev \
+    libblas-dev \
+    liblapack-dev \
+    gfortran \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip and install wheel
+RUN python -m pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# Install Python dependencies in optimized order
+# Core scientific computing
+RUN pip install --no-cache-dir numpy==1.26.4
+
+# AWS and cloud services
+RUN pip install --no-cache-dir \
+    boto3==1.38.0 \
+    botocore==1.38.0
+
+# PDF processing libraries
+RUN pip install --no-cache-dir \
+    PyPDF2==3.0.1 \
+    pypdfium2==4.30.1 \
+    pypdf==5.5.0 \
+    pdfplumber==0.11.7 \
+    pdf2image==1.17.0
+
+# Image processing
+RUN pip install --no-cache-dir \
+    Pillow==11.3.0 \
+    opencv-python==4.11.0.86
+
+# Data processing
+RUN pip install --no-cache-dir \
+    pandas==1.5.3 \
+    tabula-py==2.10.0 \
+    tabulate==0.9.0
+
+# AWS Textract and document processing
+RUN pip install --no-cache-dir \
+    amazon-textract-textractor==1.9.2 \
+    amazon-textract-caller==0.2.4 \
+    amazon-textract-response-parser==1.0.3
+
+# Additional utilities
+RUN pip install --no-cache-dir \
+    multiprocess>=0.70.14 \
+    typing-extensions>=4.0.0 \
+    langdetect==1.0.9 \
+    tenacity==9.1.2 \
+    python-dotenv \
+    pycryptodome==3.19.1 \
+    natsort==8.4.0 \
+    litellm==1.63.14
+
+# Create SageMaker directory structure with proper ownership
+RUN mkdir -p /opt/ml/processing/input/code \
+    && mkdir -p /opt/ml/processing/input/data \
+    && mkdir -p /opt/ml/processing/output \
+    && mkdir -p /opt/ml/src \
+    && mkdir -p /opt/ml/model \
+    && mkdir -p /tmp \
+    && chown -R GenAIIC:GenAIIC /opt/ml \
+    && chown -R GenAIIC:GenAIIC /tmp
+
+# Set working directory
+WORKDIR /opt/ml/processing/input/code
+
+# Copy source code to both locations for compatibility
+COPY src/ /opt/ml/processing/input/code/src/
+COPY src/ /opt/ml/src/
+COPY processing_script_clean.py /opt/ml/processing/input/code/
+COPY processing_script_clean.py /opt/ml/src/
+
+# Set proper permissions for GenAIIC user
+RUN chmod +x /opt/ml/processing/input/code/processing_script_clean.py \
+    && chmod +x /opt/ml/src/processing_script_clean.py \
+    && chown -R GenAIIC:GenAIIC /opt/ml/processing/input/code \
+    && chown -R GenAIIC:GenAIIC /opt/ml/src
+
+# Verify all dependencies and imports
+RUN python -c "import sys, platform; print(f'Python: {sys.version}'); print(f'Platform: {platform.machine()}'); print(f'Architecture: {platform.architecture()}'); import boto3, numpy, pandas, cv2, PIL; print('Core dependencies verified')" && \
+    python -c "from src.config.prompts import table_definition; from src.utils.cleanup_utility import cleanup_for_sagemaker; from src.utils.directory_manager import DirectoryManager; from src.processors.document_processor import DocumentProcessor; print('✅ All dependencies verified successfully')"
+
+# Set SageMaker environment variables
+ENV SM_MODEL_DIR=/opt/ml/model
+ENV SM_CHANNEL_TRAINING=/opt/ml/processing/input/data
+ENV SM_OUTPUT_DATA_DIR=/opt/ml/processing/output
+
+# Add healthcheck to verify container readiness
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import sys, boto3, numpy, pandas, cv2, PIL; from src.processors.document_processor import DocumentProcessor; print('Container healthy'); sys.exit(0)" || exit 1
+
+# Create optimized entrypoint for SageMaker
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "=== SageMaker Container Environment ==="\n\
+echo "Architecture: $(uname -m)"\n\
+echo "Python: $(python --version)"\n\
+echo "Working Directory: $(pwd)"\n\
+echo "Python Path: $PYTHONPATH"\n\
+echo "Environment Variables:"\n\
+env | grep -E "(SM_|PYTHON)" | sort\n\
+echo "\n=== Directory Structure ==="\n\
+ls -la /opt/ml/processing/input/code/ | head -10\n\
+echo "\n=== Starting Processing ==="\n\
+cd /opt/ml/processing/input/code\n\
+exec python processing_script_clean.py "$@"' > /opt/ml/entrypoint.sh \
+    && chmod +x /opt/ml/entrypoint.sh \
+    && chown GenAIIC:GenAIIC /opt/ml/entrypoint.sh
+
+# Add user info to entrypoint script
+RUN sed -i 's/echo "=== SageMaker Container Environment ==="/echo "=== SageMaker Container Environment ===\necho "User: $(whoami)"/g' /opt/ml/entrypoint.sh
+
+# Switch to GenAIIC user for security
+USER GenAIIC
+
+ENTRYPOINT ["/opt/ml/entrypoint.sh"]
