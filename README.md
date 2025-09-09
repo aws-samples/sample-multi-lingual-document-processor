@@ -34,7 +34,7 @@ The Multi-lingual Document Processor (MDP) is a cloud-native solution that trans
 
 ##  🎥 Video Demo
 
-![MDP Video Demo](videoDemo.mov)
+![MDP Video Demo](video_demo.mp4)
 
 ## 🏛️ System Architecture
 
