@@ -9,7 +9,10 @@
 
 The Multi-lingual Document Processor (MDP) is a cloud-native solution that transforms complex multi-modal documents into structured, narrative text optimized for AI and RAG applications. Unlike traditional OCR tools, MDP excels at processing documents with varied layouts, multimedia elements, and non-Latin scripts. MDP localises multi-modal components on a page, extracts information from each component and then puts them together in a narrative form preserving content localisation. All images and tables are also saved in separate folders for all forms of downstream applications that need both structured and unstructured information. 
 
-https://github.com/aws-samples/sample-multi-lingual-document-processor/blob/main/video_demo.mp4
+##  🎥 Video Demo
+
+https://github.com/user-attachments/assets/4c1f1998-3aa3-42df-bf62-b971a0a6016a
+
 
 ## 🚀 Key Features
 
@@ -34,9 +37,6 @@ https://github.com/aws-samples/sample-multi-lingual-document-processor/blob/main
 - **API-First**: RESTful API with authentication
 - **Scalable**: Auto-scaling based on demand
 
-##  🎥 Video Demo
-
-![MDP Video Demo](https://github.com/aws-samples/sample-multi-lingual-document-processor/blob/main/video_demo.mp4)
 
 ## 🏛️ System Architecture
 
