@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Build SageMaker-compatible pre-built Docker image and save to images folder
@@ -261,3 +262,4 @@ echo "  1. Load the image: gunzip $COMPRESSED_FILE && docker load -i ${COMPRESSE
 #echo "  2. Deploy: ./deploy_dynamic.sh $IMAGE_NAME:$IMAGE_TAG"
 echo "  2. Deploy: ./deploy_dynamic.sh"
 echo "  3. Or push to ECR: ./build_amd64_ecr.sh YOUR_REPO latest us-east-1"
+

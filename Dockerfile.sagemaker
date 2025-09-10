@@ -1,3 +1,4 @@
+
 # SageMaker-optimized Dockerfile for linux/amd64
 # This Dockerfile is specifically designed for AWS SageMaker Processing Jobs
 FROM --platform=linux/amd64 python:3.10-slim
@@ -14,8 +15,7 @@ ENV LC_ALL=C.UTF-8
 ENV SM_FRAMEWORK_PARAMS=true
 ENV PYTHONPATH=/opt/ml/processing/input/code:/opt/ml/src
 
-# Create GenAIIC user for security
-RUN groupadd -r GenAIIC && useradd -r -g GenAIIC -m -d /home/GenAIIC -s /bin/bash GenAIIC
+# User creation removed - running as root for SageMaker compatibility
 
 # Install system dependencies required for SageMaker and document processing
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -101,9 +101,7 @@ RUN mkdir -p /opt/ml/processing/input/code \
     && mkdir -p /opt/ml/processing/output \
     && mkdir -p /opt/ml/src \
     && mkdir -p /opt/ml/model \
-    && mkdir -p /tmp \
-    && chown -R GenAIIC:GenAIIC /opt/ml \
-    && chown -R GenAIIC:GenAIIC /tmp
+    && mkdir -p /tmp
 
 # Set working directory
 WORKDIR /opt/ml/processing/input/code
@@ -114,11 +112,9 @@ COPY src/ /opt/ml/src/
 COPY processing_script_clean.py /opt/ml/processing/input/code/
 COPY processing_script_clean.py /opt/ml/src/
 
-# Set proper permissions for GenAIIC user
+# Set proper permissions
 RUN chmod +x /opt/ml/processing/input/code/processing_script_clean.py \
-    && chmod +x /opt/ml/src/processing_script_clean.py \
-    && chown -R GenAIIC:GenAIIC /opt/ml/processing/input/code \
-    && chown -R GenAIIC:GenAIIC /opt/ml/src
+    && chmod +x /opt/ml/src/processing_script_clean.py
 
 # Verify all dependencies and imports
 RUN python -c "import sys, platform; print(f'Python: {sys.version}'); print(f'Platform: {platform.machine()}'); print(f'Architecture: {platform.architecture()}'); import boto3, numpy, pandas, cv2, PIL; print('Core dependencies verified')" && \
@@ -148,13 +144,11 @@ ls -la /opt/ml/processing/input/code/ | head -10\n\
 echo "\n=== Starting Processing ==="\n\
 cd /opt/ml/processing/input/code\n\
 exec python processing_script_clean.py "$@"' > /opt/ml/entrypoint.sh \
-    && chmod +x /opt/ml/entrypoint.sh \
-    && chown GenAIIC:GenAIIC /opt/ml/entrypoint.sh
+    && chmod +x /opt/ml/entrypoint.sh
 
-# Add user info to entrypoint script
-RUN sed -i 's/echo "=== SageMaker Container Environment ==="/echo "=== SageMaker Container Environment ===\necho "User: $(whoami)"/g' /opt/ml/entrypoint.sh
+# User info removed from entrypoint script
 
-# Switch to GenAIIC user for security
-USER GenAIIC
+# Running as root for SageMaker compatibility
 
 ENTRYPOINT ["/opt/ml/entrypoint.sh"]
+
