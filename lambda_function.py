@@ -22,7 +22,7 @@ def lambda_handler(event, context):
         # Extract parameters from payload
         bucket_name = event.get('bucket')
         file_key = event.get('file_key')  # S3 file key path
-        doc_category = event.get('doc_category', 'general')  # Changed from doc_type to doc_category
+        doc_category = event.get('doc_category', 'report')  # Changed from doc_type to doc_category
         doc_language = event.get('doc_language', 'english')
         output_language = event.get('output_language', 'english')  # Added output_language
 
@@ -49,7 +49,8 @@ def lambda_handler(event, context):
             instance_type='ml.m5.xlarge',
             env={
                 "BEDROCK_PROJECT_ARN": bedrock_project_arn,
-                "BEDROCK_DATA_AUTOMATION_ROLE_ARN": bedrock_data_automation_role_arn
+                "BEDROCK_DATA_AUTOMATION_ROLE_ARN": bedrock_data_automation_role_arn,
+                "FILE_KEY": file_key
             }
         )
 

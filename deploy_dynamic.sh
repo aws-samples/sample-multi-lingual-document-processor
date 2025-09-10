@@ -688,3 +688,4 @@ echo "  Stack Name: $STACK_NAME"
 echo "  Bucket Name: $BUCKET_NAME"
 echo "  ECR Repository: $ECR_REPO_NAME"
 echo "  Region: $AWS_REGION"
+
