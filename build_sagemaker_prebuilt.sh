@@ -259,5 +259,5 @@ print_status ""
 print_status "Next steps:"
 echo "  1. Load the image: gunzip $COMPRESSED_FILE && docker load -i ${COMPRESSED_FILE%.gz}"
 #echo "  2. Deploy: ./deploy_dynamic.sh $IMAGE_NAME:$IMAGE_TAG"
-echo "  2. Deploy: ./deploy_dynamic.sh
+echo "  2. Deploy: ./deploy_dynamic.sh"
 echo "  3. Or push to ECR: ./build_amd64_ecr.sh YOUR_REPO latest us-east-1"
