@@ -533,7 +533,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Sujoy Roy (Principal Applied Scientist, AWS)
 - Shreya Goyal (Applied Scientist, AWS)
 - Xiaogang Wang (Senior Applied Scientist, AWS)
-- Iman Abbasnejad (Deep Learning Architect, AWS)
+- Iman Abbasnejad (Applied Scientist, AWS)
 ---
 
 **🚀 Ready to process your multi-lingual documents? Start with the Quick Start guide above!**
